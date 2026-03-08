@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Đánh giá Rủi ro Gian lận AI - UEL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .risk-gradient {
+            background: conic-gradient(#ef4444 var(--risk-percent), #e5e7eb 0deg);
+        }
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .7; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-indigo-900 text-white flex-shrink-0 hidden md:flex flex-col">
+            <div class="p-6">
+                <div class="flex items-center space-x-3 mb-8">
+                    <div class="bg-white p-2 rounded-lg">
+                        <i class="fas fa-shield-check text-indigo-900 text-xl"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight">FraudGuard AI</span>
+                </div>
+                <nav class="space-y-4">
+                    <a href="#" class="flex items-center space-x-3 p-3 bg-indigo-800 rounded-lg">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 p-3 hover:bg-indigo-800 rounded-lg transition">
+                        <i class="fas fa-search-dollar"></i>
+                        <span>Kiểm tra giao dịch</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 p-3 hover:bg-indigo-800 rounded-lg transition">
+                        <i class="fas fa-history"></i>
+                        <span>Lịch sử gian lận</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 p-3 hover:bg-indigo-800 rounded-lg transition">
+                        <i class="fas fa-cog"></i>
+                        <span>Cài đặt mô hình</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="mt-auto p-6 border-t border-indigo-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center font-bold">UEL</div>
+                    <div>
+                        <p class="text-sm font-semibold">RTF Team</p>
+                        <p class="text-xs text-indigo-300">Giải pháp AI - UEL</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <!-- Topbar -->
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+                <h1 class="text-xl font-bold text-gray-800">Phân tích Rủi ro Giao dịch</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-500 italic">Model Status: <span class="text-green-500 font-semibold">● Active (RF-v2.1)</span></span>
+                    <button class="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-200">
+                        <i class="fas fa-plus mr-2"></i>Giao dịch mới
+                    </button>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-6xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                    <!-- Left Column: Input Form -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <h2 class="text-lg font-bold mb-4 flex items-center">
+                                <i class="fas fa-file-invoice-dollar mr-2 text-indigo-600"></i>
+                                Chi tiết giao dịch
+                            </h2>
+                            <form id="fraudForm" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Số tiền (Amount)</label>
+                                    <input type="number" id="amount" value="5000" class="w-full border-gray-200 border rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Giờ giao dịch (0-23)</label>
+                                    <input type="range" id="hour" min="0" max="23" value="2" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                                    <div class="flex justify-between text-xs text-gray-400 mt-1"><span>00:00</span><span id="hourVal">02:00</span><span>23:59</span></div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Tần suất giao dịch (24h)</label>
+                                    <input type="number" id="txCount" value="8" class="w-full border-gray-200 border rounded-lg p-3 focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Tuổi tài khoản (Ngày)</label>
+                                    <input type="number" id="accAge" value="10" class="w-full border-gray-200 border rounded-lg p-3 focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Thiết bị</label>
+                                    <select id="device" class="w-full border-gray-200 border rounded-lg p-3 focus:ring-2 focus:ring-indigo-500">
+                                        <option value="mobile" selected>Điện thoại (Mobile)</option>
+                                        <option value="desktop">Máy tính (Desktop)</option>
+                                        <option value="unknown">Thiết bị lạ (Unknown)</option>
+                                    </select>
+                                </div>
+                                <button type="button" onclick="analyzeFraud()" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all active:scale-95">
+                                    PHÂN TÍCH RỦI RO
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Results -->
+                    <div class="lg:col-span-2 space-y-6">
+
+                        <!-- Risk Score Gauge -->
+                        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center md:flex-row md:justify-around">
+                            <div class="relative w-48 h-48 flex items-center justify-center rounded-full bg-gray-100 border-8 border-gray-50 shadow-inner">
+                                <div id="riskGauge" class="absolute inset-0 rounded-full border-8 border-red-500 transition-all duration-1000" style="clip-path: inset(0 0 0 0); transform: rotate(0deg);"></div>
+                                <div class="text-center z-10">
+                                    <span id="riskPercent" class="text-5xl font-extrabold text-red-600">78%</span>
+                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Risk Score</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 md:mt-0 text-center md:text-left">
+                                <div id="decisionBadge" class="inline-block px-4 py-2 bg-red-100 text-red-700 rounded-full font-bold text-sm mb-4 animate-pulse-slow">
+                                    <i class="fas fa-ban mr-2"></i>QUYẾT ĐỊNH: TỪ CHỐI (BLOCK)
+                                </div>
+                                <h3 class="text-2xl font-bold text-gray-800 mb-2">Độ tin cậy AI: <span class="text-green-500">Cao</span></h3>
+                                <p class="text-gray-500 max-w-xs">Hệ thống phát hiện các mẫu hành vi trùng khớp 92% với các kịch bản gian lận lịch sử.</p>
+                            </div>
+                        </div>
+
+                        <!-- Top Risk Factors (Explainability) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                                <h3 class="font-bold text-gray-700 mb-4 flex items-center">
+                                    <i class="fas fa-list-ul mr-2 text-orange-500"></i>Các yếu tố rủi ro chính
+                                </h3>
+                                <ul id="reasonList" class="space-y-3">
+                                    <li class="flex items-start text-sm bg-orange-50 p-3 rounded-lg border-l-4 border-orange-400">
+                                        <i class="fas fa-exclamation-triangle text-orange-500 mt-1 mr-3"></i>
+                                        <div>
+                                            <p class="font-bold">Số tiền giao dịch cao</p>
+                                            <p class="text-xs text-gray-500">Vượt 250% so với trung bình người dùng.</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start text-sm bg-orange-50 p-3 rounded-lg border-l-4 border-orange-400">
+                                        <i class="fas fa-clock text-orange-500 mt-1 mr-3"></i>
+                                        <div>
+                                            <p class="font-bold">Khung giờ rủi ro</p>
+                                            <p class="text-xs text-gray-500">Giao dịch thực hiện lúc 2 giờ sáng.</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start text-sm bg-orange-50 p-3 rounded-lg border-l-4 border-orange-400">
+                                        <i class="fas fa-user-clock text-orange-500 mt-1 mr-3"></i>
+                                        <div>
+                                            <p class="font-bold">Tài khoản mới</p>
+                                            <p class="text-xs text-gray-500">Đăng ký dưới 30 ngày.</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Actions & Recommendations -->
+                            <div class="bg-indigo-900 p-6 rounded-2xl shadow-lg text-white">
+                                <h3 class="font-bold mb-4 flex items-center text-indigo-200">
+                                    <i class="fas fa-lightbulb mr-2"></i>Khuyến nghị quản trị
+                                </h3>
+                                <div class="space-y-4">
+                                    <p class="text-sm text-indigo-100">Dựa trên điểm rủi ro <strong>78%</strong>, chúng tôi đề xuất:</p>
+                                    <div class="space-y-2">
+                                        <button class="w-full py-2 bg-red-500 hover:bg-red-600 rounded-lg font-bold text-sm transition">Xác nhận Chặn (Confirm Block)</button>
+                                        <button class="w-full py-2 bg-indigo-700 hover:bg-indigo-600 rounded-lg font-bold text-sm transition text-indigo-100">Yêu cầu xác thực OTP/Biometric</button>
+                                        <button class="w-full py-2 border border-indigo-500 hover:bg-indigo-800 rounded-lg font-bold text-sm transition">Bỏ qua & Phê duyệt</button>
+                                    </div>
+                                    <div class="mt-4 pt-4 border-t border-indigo-800">
+                                        <p class="text-[10px] text-indigo-400 uppercase tracking-widest font-bold">Ghi chú nghiệp vụ</p>
+                                        <p class="text-xs italic text-indigo-300">"Hành vi này giống với cuộc tấn công 'Account Takeover' tháng trước."</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Cập nhật text cho slider giờ
+        document.getElementById('hour').addEventListener('input', function(e) {
+            let h = e.target.value.padStart(2, '0');
+            document.getElementById('hourVal').innerText = h + ':00';
+        });
+
+        async function analyzeFraud() {
+            const btn = document.querySelector('button[onclick="analyzeFraud()"]');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang xử lý...';
+            btn.disabled = true;
+
+            const payload = {
+                amount: Number(document.getElementById("amount").value),
+                hour: Number(document.getElementById("hour").value),
+                device: document.getElementById("device").value,
+                tx_last_24h: Number(document.getElementById("txCount").value),
+                account_age: Number(document.getElementById("accAge").value)
+            };
+
+            try {
+                const response = await fetch("http://127.0.0.1:9000/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Backend error");
+                }
+
+                const data = await response.json();
+
+                // backend trả risk_score dạng 0–1
+                updateUI(data.risk_score, data.reasons);
+
+            } catch (err) {
+                console.error(err);
+                alert("Không kết nối được Backend");
+            } finally {
+                btn.innerHTML = 'PHÂN TÍCH RỦI RO';
+                btn.disabled = false;
+            }
+        }
+
+
+        function updateUI(risk, reasons) {
+            const percent = Math.round(risk * 100);
+            const scoreEl = document.getElementById('riskPercent');
+            const badge = document.getElementById('decisionBadge');
+            const list = document.getElementById('reasonList');
+
+            scoreEl.innerText = percent + '%';
+
+            // Đổi màu dựa trên mức độ rủi ro
+            if (percent < 40) {
+                scoreEl.className = "text-5xl font-extrabold text-green-500";
+                badge.className = "inline-block px-4 py-2 bg-green-100 text-green-700 rounded-full font-bold text-sm mb-4";
+                badge.innerHTML = '<i class="fas fa-check-circle mr-2"></i>QUYẾT ĐỊNH: CHẤP THUẬN';
+            } else if (percent < 70) {
+                scoreEl.className = "text-5xl font-extrabold text-yellow-500";
+                badge.className = "inline-block px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full font-bold text-sm mb-4";
+                badge.innerHTML = '<i class="fas fa-eye mr-2"></i>QUYẾT ĐỊNH: XEM XÉT (REVIEW)';
+            } else {
+                scoreEl.className = "text-5xl font-extrabold text-red-600";
+                badge.className = "inline-block px-4 py-2 bg-red-100 text-red-700 rounded-full font-bold text-sm mb-4 animate-pulse-slow";
+                badge.innerHTML = '<i class="fas fa-ban mr-2"></i>QUYẾT ĐỊNH: TỪ CHỐI (BLOCK)';
+            }
+
+            // Cập nhật danh sách lý do
+            list.innerHTML = reasons.map(r => `
+                <li class="flex items-start text-sm bg-orange-50 p-3 rounded-lg border-l-4 border-orange-400">
+                    <i class="fas fa-exclamation-triangle text-orange-500 mt-1 mr-3"></i>
+                    <div><p class="font-bold">${r}</p><p class="text-xs text-gray-500">Phát hiện bởi Risk Engine.</p></div>
+                </li>
+            `).join('') || '<p class="text-gray-400 italic text-sm">Không có yếu tố rủi ro đáng kể.</p>';
+        }
+    </script>
+</body>
+</html>
