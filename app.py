@@ -91,7 +91,7 @@ def predict(tx: TransactionInput):
             "device": tx_data["device"],
             "risk_score": result["risk_score"],
             "decision": result["decision"],
-            "reasons": json.dumps(result.get("reasons", []), ensure_ascii=False)  # lưu dạng JSON string
+            "reasons": json.dumps(result.get("reasons", []), ensure_ascii=False)
         }
 
         # Lưu vào SQLite
